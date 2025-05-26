@@ -2,6 +2,7 @@ package io.dhlottery.user.controller
 
 import io.dhlottery.user.dto.CreateUserRequest
 import io.dhlottery.user.dto.ErrorResponse
+import io.dhlottery.user.dto.PagedUserResponse
 import io.dhlottery.user.dto.UpdateUserRequest
 import io.dhlottery.user.dto.UserDto
 import io.dhlottery.user.dto.ValidationErrorResponse
@@ -13,7 +14,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
@@ -36,7 +36,7 @@ class UserController(
             ApiResponse(
                 responseCode = "200",
                 description = "사용자 목록 조회 성공",
-                content = [Content(mediaType = "application/json", schema = Schema(implementation = Page::class))]
+                content = [Content(mediaType = "application/json", schema = Schema(implementation = PagedUserResponse::class))]
             )
         ]
     )
@@ -44,7 +44,7 @@ class UserController(
     fun getAllUsers(
         @Parameter(description = "페이지네이션 정보 (기본값: page=0, size=20)")
         @PageableDefault(size = 20) pageable: Pageable
-    ): ResponseEntity<Page<UserDto>> {
+    ): ResponseEntity<PagedUserResponse> {
         val users = userService.getAllUsers(pageable)
         return ResponseEntity.ok(users)
     }
