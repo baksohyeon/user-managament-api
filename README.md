@@ -1,6 +1,7 @@
 # User Management API
 
 A RESTful API for managing users built with Spring Boot and Kotlin.
+http://localhost:8080/swagger-ui/index.html
 
 ## Features
 
