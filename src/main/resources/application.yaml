@@ -27,11 +27,15 @@ spring:
 
 # Logging Configuration
 logging:
-    level:
-        org.hibernate: WARN
-        org.springframework.web: INFO
-        io.dhlottery.user: INFO
+  level:
+    org.springdoc: WARN
+    org.hibernate: WARN
+    org.springframework.web: INFO
+    io.dhlottery.user: INFO
 springdoc:
+    default-consumes-media-type: application/json
+    default-produces-media-type: application/json
+    writer-with-default-pretty-printer: true
     swagger-ui:
         path: /swagger-ui.html  # Swagger UI 접근 경로
         enabled: true
@@ -43,6 +47,8 @@ springdoc:
         path: /api-docs
         enabled: true
     show-actuator: false
+    model-and-view-allowed: false
+
 # Server Configuration
 server:
     port: 8080
