@@ -20,10 +20,17 @@ spring:
         database-platform: org.hibernate.dialect.H2Dialect
         hibernate:
             ddl-auto: create-drop
-        show-sql: true
+        show-sql: false
         properties:
             hibernate:
-                format_sql: true
+                format_sql: false
+
+# Logging Configuration
+logging:
+    level:
+        org.hibernate: WARN
+        org.springframework.web: INFO
+        io.dhlottery.user: INFO
 springdoc:
     swagger-ui:
         path: /swagger-ui.html  # Swagger UI 접근 경로
