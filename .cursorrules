@@ -29,33 +29,6 @@ Entities：
 6. Use companion objects for constants and factory methods.
 7. Leverage Kotlin's default parameter values for optional fields.
 
-Example:
-```kotlin
-@Entity
-@Table(name = "users")
-data class User(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
-    
-    @field:NotBlank
-    @field:Size(max = 100)
-    val name: String,
-    
-    @field:Email
-    val email: String,
-    
-    @field:Size(max = 500)
-    val bio: String? = null,
-    
-    @CreationTimestamp
-    val createdAt: LocalDateTime = LocalDateTime.now()
-) {
-    companion object {
-        const val MAX_NAME_LENGTH = 100
-    }
-}
-```
 
 Repository (DAO)：
 
@@ -67,20 +40,6 @@ Repository (DAO)：
 6. Use suspend functions for reactive repositories.
 7. Use Kotlin's nullable return types appropriately (e.g., `findByEmail(email: String): User?`).
 
-Example:
-```kotlin
-@Repository
-interface UserRepository : JpaRepository<User, Long> {
-    
-    @Query("SELECT u FROM User u WHERE u.email = :email")
-    fun findByEmail(@Param("email") email: String): User?
-    
-    @EntityGraph(attributePaths = ["profile"])
-    fun findAllWithProfile(): List<User>
-    
-    fun existsByEmail(email: String): Boolean
-}
-```
 
 Service：
 
@@ -94,37 +53,6 @@ Service：
 8. Use suspend functions for async operations when appropriate.
 9. Leverage Kotlin's `when` expressions and smart casts for conditional logic.
 
-Example:
-```kotlin
-interface UserService {
-    suspend fun createUser(request: CreateUserRequest): UserResponse
-    fun getUserById(id: Long): UserResponse?
-    fun getAllUsers(): List<UserResponse>
-}
-
-@Service
-@Transactional
-class UserServiceImpl(
-    private val userRepository: UserRepository
-) : UserService {
-    
-    override suspend fun createUser(request: CreateUserRequest): UserResponse {
-        val user = User(
-            name = request.name,
-            email = request.email,
-            bio = request.bio
-        )
-        val savedUser = userRepository.save(user)
-        return UserResponse.from(savedUser)
-    }
-    
-    override fun getUserById(id: Long): UserResponse? {
-        return userRepository.findById(id)
-            .orElse(null)
-            ?.let { UserResponse.from(it) }
-    }
-}
-```
 
 Data Transfer Object (DTO)：
 
@@ -134,46 +62,6 @@ Data Transfer Object (DTO)：
 4. Use companion objects for factory methods (e.g., `from()` methods).
 5. Leverage Kotlin's default parameter values for optional fields.
 6. Use sealed classes for representing different states or types when appropriate.
-
-Example:
-```kotlin
-data class CreateUserRequest(
-    @field:NotBlank
-    @field:Size(max = 100)
-    val name: String,
-    
-    @field:Email
-    val email: String,
-    
-    @field:Size(max = 500)
-    val bio: String? = null
-)
-
-data class UserResponse(
-    val id: Long,
-    val name: String,
-    val email: String,
-    val bio: String?,
-    val createdAt: LocalDateTime
-) {
-    companion object {
-        fun from(user: User): UserResponse {
-            return UserResponse(
-                id = user.id,
-                name = user.name,
-                email = user.email,
-                bio = user.bio,
-                createdAt = user.createdAt
-            )
-        }
-    }
-}
-
-sealed class ApiResult<out T> {
-    data class Success<T>(val data: T) : ApiResult<T>()
-    data class Error(val message: String, val code: Int) : ApiResult<Nothing>()
-}
-```
 
 RestController：
 
@@ -186,91 +74,8 @@ RestController：
 7. Leverage coroutines for async operations when beneficial.
 8. Use Kotlin's smart casts and null-safe operators.
 
-Example:
-```kotlin
-@RestController
-@RequestMapping("/api/users")
-class UserController(
-    private val userService: UserService
-) {
-    
-    @PostMapping
-    suspend fun createUser(@Valid @RequestBody request: CreateUserRequest): ResponseEntity<ApiResponse<UserResponse>> {
-        return try {
-            val user = userService.createUser(request)
-            ResponseEntity.ok(ApiResponse.success("User created successfully", user))
-        } catch (e: Exception) {
-            ResponseEntity.badRequest().body(ApiResponse.error(e.message ?: "Unknown error"))
-        }
-    }
-    
-    @GetMapping("/{id}")
-    fun getUserById(@PathVariable id: Long): ResponseEntity<ApiResponse<UserResponse>> {
-        return userService.getUserById(id)?.let { user ->
-            ResponseEntity.ok(ApiResponse.success("User found", user))
-        } ?: ResponseEntity.notFound().build()
-    }
-}
-```
 
-ApiResponse Class：
 
-```kotlin
-data class ApiResponse<T>(
-    val result: String,    // SUCCESS or ERROR
-    val message: String,   // success or error message
-    val data: T? = null    // return object from service class, if successful
-) {
-    companion object {
-        fun <T> success(message: String, data: T): ApiResponse<T> {
-            return ApiResponse("SUCCESS", message, data)
-        }
-        
-        fun error(message: String): ApiResponse<Nothing> {
-            return ApiResponse("ERROR", message, null)
-        }
-    }
-}
-```
-
-GlobalExceptionHandler Class：
-
-```kotlin
-@RestControllerAdvice
-class GlobalExceptionHandler {
-    
-    @ExceptionHandler(IllegalArgumentException::class)
-    fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ApiResponse<Nothing>> {
-        return ResponseEntity.badRequest().body(
-            ApiResponse.error(ex.message ?: "Invalid argument")
-        )
-    }
-    
-    @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleValidationException(ex: MethodArgumentNotValidException): ResponseEntity<ApiResponse<Nothing>> {
-        val errors = ex.bindingResult.fieldErrors.joinToString(", ") { 
-            "${it.field}: ${it.defaultMessage}" 
-        }
-        return ResponseEntity.badRequest().body(
-            ApiResponse.error("Validation failed: $errors")
-        )
-    }
-    
-    @ExceptionHandler(Exception::class)
-    fun handleGenericException(ex: Exception): ResponseEntity<ApiResponse<Nothing>> {
-        return ResponseEntity.internalServerError().body(
-            ApiResponse.error("Internal server error: ${ex.message}")
-        )
-    }
-    
-    companion object {
-        fun errorResponseEntity(message: String, status: HttpStatus): ResponseEntity<ApiResponse<Nothing>> {
-            val response = ApiResponse.error(message)
-            return ResponseEntity(response, status)
-        }
-    }
-}
-```
 
 Kotlin Best Practices：
 
