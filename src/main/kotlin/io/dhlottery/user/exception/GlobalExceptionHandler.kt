@@ -14,7 +14,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.time.Instant
-import java.time.LocalDateTime
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -64,7 +63,7 @@ class GlobalExceptionHandler {
         val errorResponse = ValidationErrorResponse(
             code = "VALIDATION_ERROR",
             message = "Validation failed for one or more fields",
-            timestamp = LocalDateTime.now(),
+            timestamp = Instant.now(),
             path = request.requestURI,
             fieldErrors = fieldErrors
         )

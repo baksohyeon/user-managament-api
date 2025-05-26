@@ -23,16 +23,16 @@ data class ErrorResponse(
 data class ValidationErrorResponse(
     @Schema(description = "에러 코드", example = "VALIDATION_ERROR")
     val code: String = "VALIDATION_ERROR",
-    
+
     @Schema(description = "전체 에러 메시지", example = "Validation failed")
     val message: String,
-    
+
     @Schema(description = "에러 발생 시간", example = "2024-01-01T12:00:00")
-    val timestamp: LocalDateTime = LocalDateTime.now(),
-    
+    val timestamp: Instant? = Instant.now(),
+
     @Schema(description = "요청 경로", example = "/api/users")
     val path: String? = null,
-    
+
     @Schema(description = "필드별 에러 상세 정보")
     val fieldErrors: List<FieldError>
 )
