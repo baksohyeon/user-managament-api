@@ -1,12 +1,14 @@
 package io.dhlottery.user.service
 
 import io.dhlottery.user.dto.CreateUserRequest
+import io.dhlottery.user.dto.PagedUserResponse
 import io.dhlottery.user.dto.UpdateUserRequest
 import io.dhlottery.user.dto.UserDto
 import io.dhlottery.user.entity.User
 import io.dhlottery.user.repository.UserRepository
-import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,8 +18,29 @@ class UserService(
     private val userRepository: UserRepository
 ) {
 
-    fun getAllUsers(pageable: Pageable): Page<UserDto> {
-        return userRepository.findAll(pageable).map { it.toDto() }
+    fun getAllUsers(pageable: Pageable): PagedUserResponse {
+        val validatedPageable = validateAndSanitizePageable(pageable)
+        val page = userRepository.findAll(validatedPageable).map { it.toDto() }
+        return PagedUserResponse.from(page)
+    }
+
+    private fun validateAndSanitizePageable(pageable: Pageable): Pageable {
+        val validProperties = setOf("id", "email", "name", "password")
+        
+        // Check if sort properties are valid
+        val sortProperties = pageable.sort.toList().map { it.property }
+        val invalidProperties = sortProperties.filter { !validProperties.contains(it) }
+        
+        if (invalidProperties.isNotEmpty()) {
+            // If invalid properties found, use default sort by id
+            return PageRequest.of(
+                pageable.pageNumber,
+                pageable.pageSize,
+                Sort.by("id")
+            )
+        }
+        
+        return pageable
     }
 
     fun getUserById(id: Long): UserDto {
