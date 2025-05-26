@@ -1,19 +1,20 @@
 package io.dhlottery.user.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import java.time.Instant
 import java.time.LocalDateTime
 
 @Schema(description = "에러 응답 DTO")
 data class ErrorResponse(
     @Schema(description = "에러 코드", example = "USER_NOT_FOUND")
     val code: String,
-    
+
     @Schema(description = "에러 메시지", example = "User not found with id: 1")
     val message: String,
-    
+
     @Schema(description = "에러 발생 시간", example = "2024-01-01T12:00:00")
-    val timestamp: LocalDateTime = LocalDateTime.now(),
-    
+    val timestamp: Instant,
+
     @Schema(description = "요청 경로", example = "/api/users/1")
     val path: String? = null
 )

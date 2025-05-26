@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import java.time.Instant
 import java.time.LocalDateTime
 
 @RestControllerAdvice
@@ -24,7 +25,7 @@ class GlobalExceptionHandler {
         val errorResponse = ErrorResponse(
             code = "USER_NOT_FOUND",
             message = ex.message ?: "User not found",
-            timestamp = LocalDateTime.now(),
+            timestamp =  Instant.now(),
             path = request.requestURI
         )
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)
@@ -38,7 +39,7 @@ class GlobalExceptionHandler {
         val errorResponse = ErrorResponse(
             code = "USER_ALREADY_EXISTS",
             message = ex.message ?: "User already exists",
-            timestamp = LocalDateTime.now(),
+            timestamp =  Instant.now(),
             path = request.requestURI
         )
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse)
@@ -75,7 +76,7 @@ class GlobalExceptionHandler {
         val errorResponse = ErrorResponse(
             code = "INVALID_ARGUMENT",
             message = ex.message ?: "Invalid argument provided",
-            timestamp = LocalDateTime.now(),
+            timestamp =  Instant.now(),
             path = request.requestURI
         )
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
@@ -87,9 +88,9 @@ class GlobalExceptionHandler {
         request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(
-            code = "INTERNAL_SERVER_ERROR",
-            message = "An unexpected error occurred",
-            timestamp = LocalDateTime.now(),
+            code = ex.javaClass.simpleName.uppercase(),
+            message = ex.message ?: "Internal server error",
+            timestamp =  Instant.now(),
             path = request.requestURI
         )
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse)
