@@ -39,6 +39,7 @@ dependencies {
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testImplementation("org.springframework.security:spring-security-test")
 	testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+	testImplementation("org.junit.platform:junit-platform-suite-api")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
     implementation("org.springdoc:springdoc-openapi-starter-common:2.3.0")
