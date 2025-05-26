@@ -43,7 +43,7 @@ class UserController(
     @GetMapping
     fun getAllUsers(
         @Parameter(description = "페이지네이션 정보 (기본값: page=0, size=20)")
-        @PageableDefault(size = 20) pageable: Pageable
+        @PageableDefault(size = 20, sort = ["id"]) pageable: Pageable
     ): ResponseEntity<PagedUserResponse> {
         val users = userService.getAllUsers(pageable)
         return ResponseEntity.ok(users)

@@ -6,6 +6,8 @@ import io.dhlottery.user.dto.ValidationErrorResponse
 import io.dhlottery.user.service.UserAlreadyExistsException
 import io.dhlottery.user.service.UserNotFoundException
 import jakarta.servlet.http.HttpServletRequest
+import org.slf4j.LoggerFactory
+import org.springframework.data.mapping.PropertyReferenceException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -16,6 +18,7 @@ import java.time.LocalDateTime
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
+    private val logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
     @ExceptionHandler(UserNotFoundException::class)
     fun handleUserNotFoundException(
@@ -68,6 +71,20 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
     }
 
+    @ExceptionHandler(PropertyReferenceException::class)
+    fun handlePropertyReferenceException(
+        ex: PropertyReferenceException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        val errorResponse = ErrorResponse(
+            code = "INVALID_SORT_PROPERTY",
+            message = "Invalid sort property: ${ex.propertyName}. Valid properties are: id, email, name, password",
+            timestamp = Instant.now(),
+            path = request.requestURI
+        )
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
+    }
+
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(
         ex: IllegalArgumentException,
@@ -87,12 +104,14 @@ class GlobalExceptionHandler {
         ex: Exception,
         request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
+        logger.error("Unexpected error occurred at ${request.requestURI}", ex)
         val errorResponse = ErrorResponse(
-            code = ex.javaClass.simpleName.uppercase(),
-            message = ex.message ?: "Internal server error",
-            timestamp =  Instant.now(),
+            code = "INTERNAL_SERVER_ERROR",
+            message = "An unexpected error occurred",
+            timestamp = Instant.now(),
             path = request.requestURI
         )
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse)
     }
+
 } 
